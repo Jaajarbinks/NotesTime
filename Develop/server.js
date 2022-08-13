@@ -3,7 +3,8 @@ const path = require('path')
 const fs = require('fs')
 const util = require('util')
 const { uid } = require('uid')
-const notes = require('./db/db.json')
+const { parse } = require('path')
+// let notes = require('./db/db.json')
 
 const app = express()
 const PORT = 3001
@@ -26,7 +27,14 @@ app.get('/notes', (req, res) => {
 })
 
 app.get('/api/notes', (req, res) => {
-  res.json(notes)
+  fs.readFile('./db/db.json', 'utf-8', (err, data) => {
+    if (err) {
+      console.log(err)
+    }
+    console.log(data)
+    res.json(JSON.parse(data))
+  })
+  // res.send(notes)
 })
 
 // app.post('/api/notes', (req, res) => {
@@ -53,19 +61,46 @@ app.get('/api/notes', (req, res) => {
 // })
 
 app.post('/api/notes', (req, res) => {
-  // writeFile('db/db.json', JSON.stringify(notes))
-  newNote = {
-    id: req.body.uid,
+  const newNote = {
+    id: uid(),
     title: req.body.title,
     text: req.body.text,
   }
-  notes.push(newNote)
-  res.json(notes)
+  fs.readFile('./db/db.json', 'utf-8', (err, data) => {
+    if (err) {
+      console.log(err)
+    }
+    // console.log(data)
+    const dataArray = JSON.parse(data)
+    const newData = [...dataArray, newNote]
+    // console.log(JSON.stringify(newData))
+    fs.writeFile('./db/db.json', JSON.stringify(newData), 'utf-8', (err) => {
+      if (err) {
+        console.log(err)
+      }
+    })
+    res.send('item added success')
+  })
+  // notes.push(newNote)
+  // res.json(notes)
 })
 
-// app.delete('/api/notes/:id', (req, res) => {
-//   notes.filter((notes) => note.id === req.params.id)
-// })
+app.delete('/api/notes/:id', (req, res) => {
+  fs.readFile('./db/db.json', 'utf-8', (err, data) => {
+    if (err) {
+      console.log(err)
+    }
+    // console.log(data)
+    const parseData = JSON.parse(data)
+    const newData = parseData.filter((note) => note.id !== req.params.id)
+    fs.writeFile('./db/db.json', JSON.stringify(newData), 'utf-8', (err) => {
+      if (err) {
+        console.log(err)
+      }
+    })
+    res.send('item added success')
+  })
+})
 
 app.listen(PORT, () => {
   console.log(`now listening on port: ${PORT}`)
