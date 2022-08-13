@@ -7,7 +7,7 @@ const { parse } = require('path')
 // let notes = require('./db/db.json')
 
 const app = express()
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 
 const writeFile = util.promisify(fs.writeFile)
 const readFile = util.promisify(fs.readFile)
